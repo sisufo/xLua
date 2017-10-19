@@ -10,6 +10,8 @@ namespace XLua.LuaDLL
 {
 
     using System;
+    using System.IO;
+    using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Text;
     using XLua;
@@ -38,6 +40,40 @@ namespace XLua.LuaDLL
 #else
         const string LUADLL = "xlua";
 #endif
+
+        [DllImport("kernel32.dll", EntryPoint = "LoadLibrary")]
+        static extern int LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpLibFileName);
+
+        [DllImport("kernel32.dll", EntryPoint = "FreeLibrary")]
+        static extern bool FreeLibrary(int hModule);
+
+        static void LoadDll()
+        {
+            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string subPath = Path.Combine(assemblyDir, @"Assets\XLua\Lib");
+            string fileName = Path.Combine(subPath, string.Format(@"{0}\xlua.dll", (IntPtr.Size == 4) ? "x86" : "x64"));
+            if (!File.Exists(fileName))
+            {
+                throw new InvalidOperationException("Found xlua.dll which cannot exist. ");
+            }
+
+            LoadLibrary(fileName);
+
+            AppDomain.CurrentDomain.AssemblyResolve += (_, e) =>
+            {
+                if (e.Name.StartsWith("xlua,", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Assembly.LoadFile(fileName);
+                }
+                return null;
+            };
+        }
+
+        static Lua()
+        {
+            LoadDll();
+        }
+
 
         [DllImport(LUADLL, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr lua_tothread(IntPtr L, int index);

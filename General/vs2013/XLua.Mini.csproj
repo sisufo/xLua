@@ -111,6 +111,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\XLua\Lib\x64\xlua.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\XLua\Lib\x86\xlua.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
